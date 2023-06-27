@@ -37,3 +37,36 @@
 # obj.imitated_method #=> true
 # obj.called_times(:imitated_method) #=> 2
 # ```
+module SimpleMock
+  def self.new
+    obj = Object.new.extend(SimpleMock)
+    obj.instance_variable_set(:@watcher, {})
+    obj
+  end
+
+  def self.mock(obj)
+    obj.extend(SimpleMock)
+    obj.instance_variable_set(:@watcher, {})
+    obj
+  end
+
+  def expects(method_name, return_value)
+    define_singleton_method(method_name) do
+      return_value
+    end
+  end
+
+  def watch(method_name)
+    self.singleton_class.alias_method "org_#{method_name}", method_name
+    define_singleton_method(method_name) do
+      @watcher[method_name] ||= 0
+      return_val = send("org_#{method_name}")
+      @watcher[method_name] += 1
+      return_val
+    end
+  end
+
+  def called_times(method_name)
+    @watcher[method_name]
+  end
+end
