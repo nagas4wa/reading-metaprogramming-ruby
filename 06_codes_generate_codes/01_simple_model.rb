@@ -42,6 +42,10 @@ module SimpleModel
           history[attr] ||= []
           history[attr].push(val)
         end
+
+        define_method("#{attr}_changed?") do
+          !history[attr].nil?
+        end
       end
     end
   end
