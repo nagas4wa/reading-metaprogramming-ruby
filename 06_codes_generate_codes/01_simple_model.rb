@@ -16,11 +16,12 @@
 module SimpleModel
   def self.included(base)
     base.extend(ClassMethods)
-    base.attr_accessor :history
+    base.attr_accessor :history, :init
   end
 
   def initialize(**attrs)
     @history = {}
+    @init = attrs
     attrs.each do |attr, val|
       instance_variable_set("@#{attr}", val)
     end
@@ -28,6 +29,13 @@ module SimpleModel
 
   def changed?
     !history.empty?
+  end
+
+  def restore!
+    @history = {}
+    @init.each do |attr, val|
+      instance_variable_set("@#{attr}", val)
+    end
   end
 
   module ClassMethods
